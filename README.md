@@ -82,8 +82,8 @@ Note: Make sure Zigbee2MQTT is not running when you add the extension file.
 2. Navigate to the "Extensions" section.
 3. Click on "Add extension" or a similar option.
 4. In the new extension form:
-   - Enter `presence-timer-extension.js` as the filename.
-   - Copy the entire content of the `presence-timer-extension.js` file.
+   - Enter `presence-sensor-timer-extension.js` as the filename.
+   - Copy the entire content of the `presence-sensor-timer-extension.js` file.
    - Paste the content into the code editor in the web interface.
 5. Save the new extension.
 
