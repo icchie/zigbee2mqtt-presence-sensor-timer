@@ -141,12 +141,15 @@ For more details, please see the [ISC License](https://opensource.org/licenses/I
 
 ## Acknowledgments
 
-This project was inspired by and built upon the knowledge shared in the following resource:
+This project was inspired by and built upon the knowledge shared in the following resources:
 
 - "Aqara FP1 Tips, Tricks and Automations Examples" by SmartHomeScene
   https://smarthomescene.com/blog/aqara-fp1-tips-tricks-and-automations-examples/
 
-We are grateful for the insights and information provided in this article, which helped shape the development of this extension.
+- "Aqara RTCZCGQ11LM control via MQTT | Zigbee2MQTT"
+  https://www.zigbee2mqtt.io/devices/RTCZCGQ11LM.html
+
+We are grateful for the insights and information provided in these articles, which helped shape the development of this extension. The official Zigbee2MQTT device page for the Aqara FP1 sensor provides valuable information about the device's capabilities and MQTT interface.
 
 ## Disclaimer
 
