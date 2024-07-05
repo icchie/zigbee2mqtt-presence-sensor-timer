@@ -74,8 +74,6 @@ There are two methods to install the zigbee2mqtt-presence-sensor-timer:
 2. Download the JavaScript file for this extension.
 3. Place the downloaded .js file in the extension directory.
 
-Note: Make sure Zigbee2MQTT is not running when you add the extension file.
-
 ### Method 2: Using Zigbee2MQTT Web Interface
 
 1. Open the Zigbee2MQTT web interface.
@@ -91,20 +89,26 @@ This method allows you to add the extension directly through the Zigbee2MQTT man
 
 ## Configuration
 
-To configure the zigbee2mqtt-presence-sensor-timer, you need to add the following settings to your Zigbee2MQTT `configuration.yaml` file:
+To configure the zigbee2mqtt-presence-sensor-timer for multiple sensors, you need to add the following settings to your Zigbee2MQTT `configuration.yaml` file:
 
 ```yaml
 presence_sensor_timer_extension:
-  sensor: aqara_sensor_1
-  timer_duration: 45
+  sensors:
+    - sensor: aqara_sensor_1
+      timer_duration: 45
+    - sensor: aqara_sensor_2
+      timer_duration: 60
+    - sensor: aqara_sensor_3
+      timer_duration: 30
 ```
 
 ### Configuration Options
 
-- `sensor`: The Friendly Name of your Aqara FP1 sensor as configured in Zigbee2MQTT. This is used to identify which sensor the extension should monitor.
-- `timer_duration`: The duration (in seconds) for the presence timer. This determines how long the presence status will remain "present" after the last detected movement.
+- `sensors`: A list of sensor configurations. Each sensor configuration consists of:
+  - `sensor`: The Friendly Name of your Aqara FP1 sensor as configured in Zigbee2MQTT. This is used to identify which sensor the extension should monitor.
+  - `timer_duration`: The duration (in seconds) for the presence timer. This determines how long the presence status will remain "present" after the last detected movement.
 
-Make sure to adjust these values according to your specific setup and requirements. The Friendly Name for `sensor` should match exactly how it appears in your Zigbee2MQTT configuration.
+You can add as many sensors as you need, each with its own timer duration. Make sure to adjust these values according to your specific setup and requirements. The Friendly Name for each `sensor` should match exactly how it appears in your Zigbee2MQTT configuration.
 
 ## Usage
 
