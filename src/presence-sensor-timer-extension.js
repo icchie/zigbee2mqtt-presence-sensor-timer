@@ -11,9 +11,8 @@ class PresenceSensorTimer {
     this.logger = logger;
 
     this.mqttBaseTopic = settings.get().mqtt.base_topic;
-    this.sensor = settings.get().presence_sensor_timer_extension?.sensor || "aqara_sensor_1";
-    this.timerDuration = settings.get().presence_sensor_timer_extension?.timer_duration || 30;
-    this.timer = null;
+    this.sensorConfigs = settings.get().presence_sensor_timer_extension?.sensors || [];
+    this.timers = new Map();
 
     logger.info("PresenceSensorTimer loaded successfully");
   }
@@ -27,49 +26,55 @@ class PresenceSensorTimer {
   }
 
   onStateChange(data) {
-    if (data?.entity?.name === this.sensor) {
+    const sensorConfig = this.sensorConfigs.find((config) => config.sensor === data?.entity?.name);
+    if (sensorConfig) {
       const updatedPresenceEvent = data?.update?.presence_event;
 
       if (["away", "approach", "enter"].includes(updatedPresenceEvent)) {
-        this.logger.info(`PresenceSensorTimer ${updatedPresenceEvent} event detected. Starting/Resetting timer.`);
-        this.startTimer();
-        this.publishEnterEvent();
+        this.logger.info(
+          `PresenceSensorTimer ${updatedPresenceEvent} event detected for ${sensorConfig.sensor}. Starting/Resetting timer.`,
+        );
+        this.startTimer(sensorConfig);
+        this.publishEnterEvent(sensorConfig.sensor);
       }
     }
   }
 
-  startTimer() {
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.logger.debug("PresenceSensorTimer Existing timer cleared.");
+  startTimer(sensorConfig) {
+    if (this.timers.has(sensorConfig.sensor)) {
+      clearTimeout(this.timers.get(sensorConfig.sensor));
+      this.logger.debug(`PresenceSensorTimer Existing timer cleared for ${sensorConfig.sensor}.`);
     }
-    this.timer = setTimeout(() => {
-      this.publishLeaveEvent();
-    }, this.timerDuration * 1000);
-    this.logger.debug(`PresenceSensorTimer Timer started for ${this.timerDuration} seconds.`);
+    const timer = setTimeout(() => {
+      this.publishLeaveEvent(sensorConfig.sensor);
+    }, sensorConfig.timer_duration * 1000);
+    this.timers.set(sensorConfig.sensor, timer);
+    this.logger.debug(
+      `PresenceSensorTimer Timer started for ${sensorConfig.sensor} with duration ${sensorConfig.timer_duration} seconds.`,
+    );
   }
 
-  publishEnterEvent() {
+  publishEnterEvent(sensor) {
     try {
       const enterPayload = { presence: true };
-      this.mqtt.publish(this.sensor, JSON.stringify(enterPayload));
-      this.logger.info(`PresenceSensorTimer Published presence true`);
+      this.mqtt.publish(sensor, JSON.stringify(enterPayload));
+      this.logger.info(`PresenceSensorTimer Published presence true for ${sensor}`);
     } catch (error) {
-      this.logger.error(`PresenceSensorTimer Error publishing enter event: ${error.message}`, {
+      this.logger.error(`PresenceSensorTimer Error publishing enter event for ${sensor}: ${error.message}`, {
         stack: error.stack,
       });
     }
   }
 
-  publishLeaveEvent() {
+  publishLeaveEvent(sensor) {
     try {
       const leavePayload = {
         reset_nopresence_status: "",
       };
-      this.mqtt.publish(this.sensor, JSON.stringify(leavePayload));
-      this.logger.info("PresenceSensorTimer Published presence false");
+      this.mqtt.publish(sensor, JSON.stringify(leavePayload));
+      this.logger.info(`PresenceSensorTimer Published presence false for ${sensor}`);
     } catch (error) {
-      this.logger.error(`PresenceSensorTimer Error publishing leave event: ${error.message}`, {
+      this.logger.error(`PresenceSensorTimer Error publishing leave event for ${sensor}: ${error.message}`, {
         stack: error.stack,
       });
     }
@@ -77,10 +82,11 @@ class PresenceSensorTimer {
 
   stop() {
     this.eventBus.removeListeners(this);
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.logger.debug("PresenceSensorTimer Timer cleared on stop.");
+    for (const [sensor, timer] of this.timers) {
+      clearTimeout(timer);
+      this.logger.debug(`PresenceSensorTimer Timer cleared on stop for ${sensor}.`);
     }
+    this.timers.clear();
     this.logger.info("PresenceSensorTimer stopped");
   }
 }
