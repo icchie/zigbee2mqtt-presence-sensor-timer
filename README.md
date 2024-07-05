@@ -74,8 +74,6 @@ There are two methods to install the zigbee2mqtt-presence-sensor-timer:
 2. Download the JavaScript file for this extension.
 3. Place the downloaded .js file in the extension directory.
 
-Note: Make sure Zigbee2MQTT is not running when you add the extension file.
-
 ### Method 2: Using Zigbee2MQTT Web Interface
 
 1. Open the Zigbee2MQTT web interface.
