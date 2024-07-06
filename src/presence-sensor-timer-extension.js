@@ -1,3 +1,7 @@
+const manufacturerCode = 0x115f;
+const manufacturerOptions = {
+  lumi: { manufacturerCode: manufacturerCode, disableDefaultResponse: true },
+};
 class PresenceSensorTimer {
   constructor(zigbee, mqtt, state, publishEntityState, eventBus, settings, logger) {
     logger.info("Loading PresenceSensorTimer");
@@ -66,12 +70,13 @@ class PresenceSensorTimer {
     }
   }
 
-  publishLeaveEvent(sensor) {
+  async publishLeaveEvent(sensor) {
     try {
-      const leavePayload = {
-        reset_nopresence_status: "",
-      };
-      this.mqtt.publish(sensor, JSON.stringify(leavePayload));
+      const targetDevice = this.zigbee.devices().find((device) => device.name === sensor);
+      const endpoint = targetDevice.endpoint(0);
+
+      // reset code from zigbee-herdsman-converters/src/lib/lumi.ts
+      await endpoint.write("manuSpecificLumi", { 0x0157: { value: 1, type: 0x20 } }, manufacturerOptions.lumi);
       this.logger.info(`PresenceSensorTimer Published presence false for ${sensor}`);
     } catch (error) {
       this.logger.error(`PresenceSensorTimer Error publishing leave event for ${sensor}: ${error.message}`, {
